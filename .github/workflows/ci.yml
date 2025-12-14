@@ -10,7 +10,7 @@ on:
 
 jobs:
   python-security-ci:
-    uses: tokyoghoul212/ci-workflows/.github/workflows/python-security-ci.yml@main
+    uses: tokyoghoul212/ci-workflow/.github/workflows/python-security-ci.yml@main
     with:
       run_tests: true
       run_sonar: true
