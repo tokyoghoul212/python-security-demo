@@ -16,6 +16,7 @@
 #       run_sonar: true
 #       run_snyk: true
 #     secrets:
+
 #       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 #       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
