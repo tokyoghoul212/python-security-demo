@@ -16,124 +16,35 @@
 #       run_sonar: true
 #       run_snyk: true
 #     secrets:
-
 #       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 #       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
-name: Python Security CI (Reusable)
+name: Project CI
 
 on:
-  workflow_call:
-    inputs:
-      python_version:
-        description: "Python version to use"
-        required: false
-        type: string
-        default: "3.12"
-
-      working_directory:
-        description: "Directory to run commands in"
-        required: false
-        type: string
-        default: "."
-
-      requirements_file:
-        description: "Requirements file path (relative to working_directory)"
-        required: false
-        type: string
-        default: "requirements.txt"
-
-      run_tests:
-        description: "Run pytest"
-        required: false
-        type: boolean
-        default: true
-
-      test_command:
-        description: "Test command to run"
-        required: false
-        type: string
-        default: "pytest -q"
-
-      run_sonar:
-        description: "Run SonarQube scan"
-        required: false
-        type: boolean
-        default: false
-
-      sonar_args:
-        description: "Extra Sonar scanner args (optional)"
-        required: false
-        type: string
-        default: ""
-
-      run_snyk:
-        description: "Run Snyk (Open Source dependency scan)"
-        required: false
-        type: boolean
-        default: false
-
-      snyk_args:
-        description: "Extra Snyk args (optional)"
-        required: false
-        type: string
-        default: "--severity-threshold=high"
-
-    secrets:
-      SONAR_TOKEN:
-        required: false
-      SNYK_TOKEN:
-        required: false
-
-permissions:
-  contents: read
+  push:
+    branches-ignore:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
-  ci:
-    runs-on: ubuntu-latest
+  python-security-ci:
+    uses: tokyoghoul212/ci-workflow/.github/workflows/python-security-ci.yml@main
+    with:
+      python_version: "3.12"
+      working_directory: "."
+      requirements_file: "requirements.txt"
 
-    # IMPORTANT: put secrets into env here, then check env.* in step if-conditions
-    env:
+      run_tests: true
+      test_command: "pytest -q"
+
+      run_sonar: true
+      sonar_args: ""
+
+      run_snyk: true
+      snyk_args: "--severity-threshold=high"
+    secrets:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ inputs.python_version }}
-          cache: pip
-          cache-dependency-path: ${{ inputs.working_directory }}/${{ inputs.requirements_file }}
-
-      - name: Install dependencies
-        working-directory: ${{ inputs.working_directory }}
-        run: |
-          python -m pip install --upgrade pip
-          if [ -f "${{ inputs.requirements_file }}" ]; then
-            pip install -r "${{ inputs.requirements_file }}"
-          else
-            echo "requirements file not found: ${{ inputs.requirements_file }} (skipping install)"
-          fi
-
-      - name: Run tests
-        if: ${{ inputs.run_tests }}
-        working-directory: ${{ inputs.working_directory }}
-        run: ${{ inputs.test_command }}
-
-      - name: SonarQube Scan (Server/Cloud)
-        if: ${{ inputs.run_sonar && env.SONAR_TOKEN != '' }}
-        uses: SonarSource/sonarqube-scan-action@v7
-        with:
-          projectBaseDir: ${{ inputs.working_directory }}
-          args: ${{ inputs.sonar_args }}
-
-      - name: Snyk Open Source scan
-        if: ${{ inputs.run_snyk && env.SNYK_TOKEN != '' }}
-        uses: snyk/actions/python@master
-        with:
-          args: ${{ inputs.snyk_args }}
