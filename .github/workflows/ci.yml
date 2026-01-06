@@ -33,7 +33,7 @@ on:
 jobs:
   python-security-ci:
     # Recommended: use a stable tag like @v1 (create tag v1 in ci-workflow repo)
-    uses: tokyoghoul212/ci-workflow/.github/workflows/python-security-ci.yml@v1
+    uses: tokyoghoul212/ci-workflow/.github/workflows/python-security-ci.yml@main
     with:
       python_version: "3.12"
       working_directory: "."
