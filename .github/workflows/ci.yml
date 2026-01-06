@@ -1,3 +1,24 @@
+# name: Project CI
+
+# on:
+#   push:
+#     branches-ignore:
+#       - main
+#   pull_request:
+#     branches:
+#       - main
+
+# jobs:
+#   python-security-ci:
+#     uses: tokyoghoul212/ci-workflow/.github/workflows/python-security-ci.yml@main
+#     with:
+#       run_tests: true
+#       run_sonar: true
+#       run_snyk: true
+#     secrets:
+#       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+#       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
 name: Project CI
 
 on:
@@ -10,11 +31,19 @@ on:
 
 jobs:
   python-security-ci:
-    uses: tokyoghoul212/ci-workflow/.github/workflows/python-security-ci.yml@main
+    # Recommended: use a stable tag like @v1 (create tag v1 in ci-workflow repo)
+    uses: tokyoghoul212/ci-workflow/.github/workflows/python-security-ci.yml@v1
     with:
+      python_version: "3.12"
+      working_directory: "."
+      requirements_file: "requirements.txt"
+
       run_tests: true
+      test_command: "pytest -q"
+
       run_sonar: true
+      sonar_args: ""
+
       run_snyk: true
-    secrets:
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      snyk_args: "--severity-threshold=high"
+    secrets: inherit
